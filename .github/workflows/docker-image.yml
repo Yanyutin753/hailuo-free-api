@@ -34,16 +34,14 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set ref name
-        id: tag_name
         run: |
           REF_NAME=$(echo $GITHUB_REF | sed 's|refs/heads/||')
-          echo "::set-output name=ref::$REF_NAME"
+          echo "REF_NAME=$REF_NAME" >> $GITHUB_ENV
 
       - name: Set Docker repository names
-        id: repo-set
         run: |
-          echo "::set-output name=repo_all::$(echo "${{ github.repository }}" | awk '{print tolower($0)}')"
-          echo "::set-output name=repo_name::$(echo "${{ github.event.repository.name }}" | awk '{print tolower($0)}')"
+          echo "repo_all=$(echo "${{ github.repository }}" | awk '{print tolower($0)}')" >> $GITHUB_ENV
+          echo "repo_name=$(echo "${{ github.event.repository.name }}" | awk '{print tolower($0)}')" >> $GITHUB_ENV
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
@@ -52,11 +50,10 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            vinlic/${{ steps.repo-set.outputs.repo_name }}:${{ github.event.inputs.ref }}
-            vinlic/${{ steps.repo-set.outputs.repo_name }}:latest
-            ghcr.io/${{ steps.repo-set.outputs.repo_all }}:${{ github.event.inputs.ref }}
-            ghcr.io/${{ steps.repo-set.outputs.repo_all }}:latest
+            vinlic/${{ env.repo_name }}:${{ env.REF_NAME }}
+            vinlic/${{ env.repo_name }}:latest
+            ghcr.io/${{ env.repo_all }}:${{ env.REF_NAME }}
+            ghcr.io/${{ env.repo_all }}:latest
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
