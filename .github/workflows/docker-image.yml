@@ -35,7 +35,7 @@ jobs:
 
       - name: Set ref name
         run: |
-          REF_NAME=$(echo $GITHUB_REF | sed 's|refs/heads/||')
+          REF_NAME=$(echo $GITHUB_REF | sed 's|refs/tags/||')
           echo "REF_NAME=$REF_NAME" >> $GITHUB_ENV
 
       - name: Set Docker repository names
